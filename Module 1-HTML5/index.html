@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local Community Event Portal</title>
+    <link rel="stylesheet" href="../CSS3/styles.css">
+
+    <style>
+        body {
+            background-color: #f4f4f4;
+        }
+    </style>
+
+</head>
+
+<body>
+    <!-- Navigation -->
+
+    <nav>
+        <a href="#home">Home</a>
+        <a href="#events">Events</a>
+        <a href="#contact">Contact</a>
+
+        <a href="help.html" target="_blank">
+            Help
+        </a>
+    </nav>
+
+    <!-- Main -->
+
+    <section id="home">
+
+        <div id="mainHeader">
+
+            <h2 style="color:red;">
+                Welcome Resident
+            </h2>
+
+            <p>
+
+                Special Offer :
+
+                <span style="color:red;font-weight:bold;">
+
+                    Free Registration Today
+
+                </span>
+
+            </p>
+
+        </div>
+
+    </section>
+
+    <section id="events">
+        <table>
+
+            <tr>
+
+                <td>
+                    <img src="event1.jpg" class="gallery" alt="Music Event" title="Music Event">
+                    <p>Music Event</p>
+                </td>
+
+                <td>
+                    <img src="event2.jpg" class="gallery" alt="Food Festival" title="Food Festival">
+                    <p>Food Festival</p>
+                </td>
+
+                <td>
+                    <img src="event3.jpg" class="gallery" alt="Sports Day" title="Sports Day">
+                    <p>Sports Day</p>
+                </td>
+
+            </tr>
+
+            <tr>
+
+                <td>
+                    <img src="event4.jpg" class="gallery" alt="Art Show" title="Art Show">
+                    <p>Art Show</p>
+                </td>
+
+                <td>
+                    <img src="event5.jpg" class="gallery" alt="Book Fair" title="Book Fair">
+                    <p>Book Fair</p>
+                </td>
+
+                <td>
+                    <img src="event6.jpg" class="gallery" alt="Dance Event" title="Dance Event">
+                    <p>Dance Event</p>
+                </td>
+
+            </tr>
+
+        </table>
+
+        <h2>Filter Events</h2>
+
+        <select id="categoryFilter">
+            <option value="All">All</option>
+            <option value="Music">Music</option>
+            <option value="Sports">Sports</option>
+            <option value="Workshop">Workshop</option>
+        </select>
+
+        <input type="text" id="searchBox" placeholder="Search Event">
+
+        <h2>Available Events</h2>
+
+        <div id="eventContainer"></div>
+
+        <h2>Event Registration</h2>
+
+        <form id="eventForm" class="eventCard">
+
+            <label>Name:</label>
+            <input type="text" id="name" placeholder="Enter your name" required autofocus>
+
+            <label>Email:</label>
+            <input type="email" id="email" placeholder="Enter your email" required>
+
+            <label>Phone Number:</label>
+
+            <input type="text" id="phone" placeholder="Enter 10-digit number" onblur="validatePhone()">
+
+            <label>Date:</label>
+            <input type="date" required>
+
+            <label>Event Type:</label>
+
+            <select id="eventType" onchange="showFee()">
+
+                <option value="">Select Event</option>
+                <option value="Music">Music Event</option>
+                <option value="Sports">Sports Event</option>
+                <option value="Food">Food Festival</option>
+
+            </select>
+
+            <p id="fee"></p>
+
+            <label>Message:</label>
+            <textarea rows="4" placeholder="Enter your message">
+</textarea>
+
+            <h3>Feedback</h3>
+
+            <textarea id="feedback" onkeyup="countCharacters()">
+</textarea>
+
+            <p>
+                Characters Typed:
+                <span id="count">0</span>
+            </p>
+
+            <button type="submit">
+                Register
+            </button>
+
+            <br><br>
+
+            <output id="outputMsg"></output>
+
+        </form>
+
+        <div class="buttonSection">
+
+            <button onclick="clearPreferences()">
+                Clear Preferences
+            </button>
+
+        </div>
+
+        <div class="featuredSection">
+
+            <h2>Featured Event</h2>
+
+            <img src="event1.jpg" id="zoomImage" width="250" ondblclick="enlargeImage()">
+
+        </div>
+
+    </section>
+
+    <div class="locationSection">
+
+        <h2>Find Nearby Events</h2>
+
+        <button onclick="findLocation()">
+            Find Nearby Events
+        </button>
+
+        <p id="location"></p>
+
+    </div>
+
+    <section id="contact" class="eventCard">
+
+        <h2>Contact Section</h2>
+
+        <p>Email: community@portal.com</p>
+
+        <p>Phone: +91 9876543210</p>
+
+    </section>
+
+    <div class="videoSection">
+
+        <h2>Event Promo Video</h2>
+
+        <video id="promoVideo" width="600" controls oncanplay="videoReady()">
+
+            <source src="promo.mp4" type="video/mp4">
+
+        </video>
+
+        <p id="videoMessage"></p>
+
+    </div>
+
+    <!-- Footer -->
+
+    <h2>Community Services</h2>
+
+    <ul class="services">
+        <li>Event Registration</li>
+        <li>Feedback Submission</li>
+        <li>Community Support</li>
+    </ul>
+
+    <h2>Community News</h2>
+
+    <div class="newsArticle">
+
+        Lorem ipsum dolor sit amet consectetur adipisicing elit.
+        Lorem ipsum dolor sit amet consectetur adipisicing elit.
+        Lorem ipsum dolor sit amet consectetur adipisicing elit.
+        Lorem ipsum dolor sit amet consectetur adipisicing elit.
+        Lorem ipsum dolor sit amet consectetur adipisicing elit.
+        Lorem ipsum dolor sit amet consectetur adipisicing elit.
+        Lorem ipsum dolor sit amet consectetur adipisicing elit.
+        Lorem ipsum dolor sit amet consectetur adipisicing elit.
+
+    </div>
+
+    <script src="../JavaScript/main.js"></script>
+</body>
+
+</html>
