@@ -1,0 +1,350 @@
+/* =========================
+Universal Selector
+========================= */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+
+
+.highlight {
+    background: yellow;
+}
+
+.gallery {
+    width: 200px;
+    height: 150px;
+    border: 2px solid black;
+}
+
+
+form {
+    width: 500px;
+    border: 2px solid gray;
+    padding: 20px;
+    margin-top: 20px;
+}
+
+input,
+select,
+textarea {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+}
+
+button {
+    padding: 10px;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+td {
+    padding: 10px;
+    text-align: center;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+}
+
+nav {
+    background-color: #333;
+    padding: 10px;
+}
+
+nav a {
+    color: white;
+    margin-right: 15px;
+    text-decoration: none;
+}
+
+/* =========================
+Google Font Import
+========================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap');
+
+/* =========================
+Body Styling
+========================= */
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: #f4f4f4;
+
+    color: #222;
+    margin: 20px;
+    background: #f4f6f8;
+    font-size: 16px;
+}
+
+/* =========================
+Navigation Styles
+========================= */
+
+nav {
+    background: #333;
+    padding: 15px;
+}
+
+nav a:link {
+    color: white;
+}
+
+nav a:visited {
+    color: #ddd;
+}
+
+nav a:hover {
+    color: yellow;
+}
+
+nav a:active {
+    color: red;
+}
+
+nav a {
+    text-decoration: none;
+    margin-right: 15px;
+}
+
+/* =========================
+Header Banner
+========================= */
+
+#mainHeader {
+    background: linear-gradient(to right, #007BFF, #00C6FF);
+    color: white;
+    padding: 20px;
+}
+
+.highlight {
+    background: yellow;
+}
+
+/* =========================
+Headings
+========================= */
+
+h2 {
+    margin-top: 20px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    font-weight: 600;
+}
+
+h3,
+p {
+    line-height: 1.6;
+}
+
+/* =========================
+Event Cards
+========================= */
+
+.eventCard {
+    border: 2px solid gray;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.9);
+}
+
+/* =========================
+Gallery Images
+========================= */
+
+.gallery {
+    width: 200px;
+    height: 150px;
+    border: 2px solid black;
+}
+
+/* =========================
+Table Styling
+========================= */
+
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+th,
+td {
+    border: 1px solid black;
+    padding: 10px;
+    text-align: center;
+}
+
+tr:nth-child(even) {
+    background: #eeeeee;
+}
+
+/* =========================
+Form Styling
+========================= */
+
+form {
+    width: 60%;
+    border: 2px solid gray;
+    padding: 20px;
+    margin: 30px auto;
+    background: white;
+}
+
+input,
+select,
+textarea {
+    width: 100%;
+    padding: 8px;
+    margin-bottom: 10px;
+}
+
+input:focus,
+textarea:focus {
+    outline: 3px solid blue;
+}
+
+/* =========================
+Button Styling
+========================= */
+
+.cta-button {
+    background-color: #007BFF;
+    color: white;
+    padding: 10px;
+    border: none;
+}
+
+/* =========================
+Multi Column News Section
+========================= */
+
+.newsArticle {
+    width: 80%;
+    margin: 20px auto;
+
+    column-count: 2;
+    column-gap: 30px;
+    column-rule: 1px solid gray;
+
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+}
+
+/* =========================
+Responsive Design
+========================= */
+
+@media screen and (max-width:768px) {
+
+    nav {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .gallery {
+        width: 120px;
+        height: 100px;
+    }
+
+    body {
+        font-size: 14px;
+    }
+
+    form {
+        width: 90%;
+    }
+
+
+}
+
+.hidden {
+    visibility: hidden;
+}
+
+.none {
+    display: none;
+}
+
+.services {
+    list-style-type: square;
+    list-style-position: inside;
+    margin: 10px;
+    padding: 10px;
+}
+
+.services li {
+    margin: 5px;
+}
+
+.videoSection {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.featuredSection {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.services {
+    width: 300px;
+    margin: 20px auto;
+    text-align: left;
+}
+
+h2 {
+    text-align: center;
+    margin-top: 25px;
+    margin-bottom: 15px;
+}
+
+nav {
+    display: flex;
+    justify-content: center;
+    gap: 30px;
+}
+
+.locationSection {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.buttonSection {
+    text-align: center;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+#contact {
+    width: 70%;
+    margin: 30px auto;
+
+    background: white;
+
+    padding: 25px;
+
+    border-radius: 12px;
+
+    box-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.15);
+
+    text-align: center;
+}
+
+#contact h2 {
+    margin-bottom: 20px;
+}
+
+.featuredSection img {
+    border-radius: 10px;
+    box-shadow:
+        0 4px 10px rgba(0, 0, 0, 0.2);
+}
