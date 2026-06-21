@@ -1,0 +1,18 @@
+package Cognizant_DN.DeepSkilling.Week1.EngineeringConcepts.DataStructuresAndAlgorithms.Exercise3;
+
+public class Order {
+    int orderId;
+    String customerName;
+    double totalPrice;
+
+    public Order(int orderId, String customerName, double totalPrice) {
+        this.orderId = orderId;
+        this.customerName = customerName;
+        this.totalPrice = totalPrice;
+    }
+
+    @Override
+    public String toString() {
+        return orderId + " " + customerName + " " + totalPrice;
+    }
+}
