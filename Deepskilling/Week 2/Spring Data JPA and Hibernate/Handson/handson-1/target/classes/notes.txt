@@ -1,0 +1,155 @@
+
+SPRING INITIALIZR (https://start.spring.io/):
+- Group:       com.cognizant
+- Artifact:    orm-learn
+- Description: Demo project for Spring Data JPA and Hibernate
+- Dependencies to add:
+    * Spring Boot DevTools
+    * Spring Data JPA
+    * MySQL Driver
+
+MYSQL DATABASE SETUP:
+Run these commands in terminal:
+    mysql -u root -p
+    mysql> create schema ormlearn;
+
+COUNTRY TABLE CREATION:
+    create table country(co_code varchar(2) primary key, co_name varchar(50));
+    insert into country values ('IN', 'India');
+    insert into country values ('US', 'United States of America');
+
+NOTE: The table columns in DB are co_code and co_name, but the @Column
+annotations in the entity map them as "co_code" and "co_name" respectively.
+
+@SpringBootApplication
+  - Combines @Configuration, @EnableAutoConfiguration, and @ComponentScan
+  - Entry point annotation for any Spring Boot application
+
+@Entity
+  - Marks a class as a JPA persistence entity (maps to a DB table)
+
+@Table(name="country")
+  - Specifies the exact database table name this entity maps to
+
+@Id
+  - Marks the primary key field of the entity
+
+@Column(name="co_code")
+  - Maps a field to a specific column name in the database table
+
+@Repository
+  - Marks an interface/class as a Spring Data repository
+  - Enables exception translation from JPA exceptions to Spring exceptions
+
+@Service
+  - Marks a class as a Spring service (business logic layer)
+
+@Autowired
+  - Injects a Spring-managed bean automatically (dependency injection)
+
+@Transactional
+  - Spring manages the Hibernate session and transaction automatically
+  - Without this, you would have to manually open session, begin transaction,
+    commit or rollback, and close session (like raw Hibernate)
+  - Place on service methods that interact with the database
+
+ARCHITECTURE OVERVIEW
+
+OrmLearnApplication.java
+  └── calls CountryService methods (via ApplicationContext)
+
+CountryService.java  (@Service)
+  └── autowires CountryRepository
+  └── methods annotated with @Transactional
+
+CountryRepository.java  (@Repository)
+  └── extends JpaRepository<Country, String>
+  └── Spring auto-generates all CRUD implementations
+
+Country.java  (@Entity)
+  └── maps to 'country' table in ormlearn schema
+
+JPA (Java Persistence API):
+  - A specification (JSR 338) for persisting data from Java objects
+  - Does NOT contain a concrete implementation
+
+Hibernate:
+  - An ORM tool that IMPLEMENTS the JPA specification
+  - Handles actual DB interactions, session management, transactions
+
+Spring Data JPA:
+  - An abstraction LAYER on top of JPA/Hibernate
+  - Removes boilerplate (no manual session/transaction handling)
+  - Manages transactions automatically via @Transactional
+
+Hibernate (manual) vs Spring Data JPA (automatic):
+  Hibernate requires:
+    session = factory.openSession();
+    tx = session.beginTransaction();
+    session.save(employee);
+    tx.commit();
+    session.close();
+
+  Spring Data JPA needs only:
+    employeeRepository.save(employee);
+
+HIBERNATE DDL-AUTO OPTIONS (Hands On 5)
+
+validate   - Checks if tables/columns exist, throws exception if not found (USE IN PROD)
+create     - Drops existing tables and creates new ones on startup (LOSES DATA)
+update     - Creates table/column if missing; updates schema if needed
+create-drop - Creates tables on startup, drops them when app shuts down (for tests)
+
+Current setting: spring.jpa.hibernate.ddl-auto=validate
+
+
+findAll()            -> List<T>             - Get all records
+findById(id)         -> Optional<T>         - Get one record by primary key
+save(entity)         -> T                   - Insert or update a record
+deleteById(id)       -> void                - Delete a record by primary key
+
+Custom Query Method (for Hands On - find by name containing):
+  List<Country> findByNameContaining(String name);
+  Spring Data JPA auto-generates the query from the method name.
+
+Running the project
+1. Make sure MySQL is running locally on port 3306
+2. Ensure 'ormlearn' schema exists with 'country' table
+3. Open OrmLearnApplication.java
+4. Click the green Run button (or Shift+F10)
+5. Check the Console/Run window for log output
+6. LOGGER.info("Inside main") should appear in the log
+
+BUILD FROM TERMINAL (Maven):
+    cd orm-learn
+    mvn clean package
+
+RUN FROM TERMINAL:
+    mvn spring-boot:run
+
+
+Delete existing records before inserting the full country list:
+    DELETE FROM country;
+
+Then run the full INSERT script from the hands-on document.
+The country table uses co_code (2-char ISO code) as primary key.
+
+Countries are mapped in the entity via:
+    @Column(name = "co_code")  -> code field
+    @Column(name = "co_name")  -> name field
+
+
+The main() method:
+1. Runs Spring Boot and captures ApplicationContext
+2. Gets CountryService bean from context
+3. Calls test methods one by one
+
+Test methods:
+  testGetAllCountries()    -> calls countryService.getAllCountries()
+  testGetCountryByCode()   -> calls countryService.findCountryByCode("IN")
+  testAddCountry()         -> creates a Country object and calls addCountry()
+  testUpdateCountry()      -> calls updateCountry() with a code and new name
+  testDeleteCountry()      -> calls deleteCountry() with a code
+
+CountryNotFoundException is thrown when findById() returns an empty Optional.
+
