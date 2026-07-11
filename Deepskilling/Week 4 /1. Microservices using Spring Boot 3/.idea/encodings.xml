@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/exercise-1-user-order-management/order-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/exercise-1-user-order-management/user-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/exercise-2-inventory-management/config-server/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/exercise-2-inventory-management/eureka-server/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/exercise-2-inventory-management/inventory-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/exercise-2-inventory-management/product-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/exercise-3-api-gateway/api-gateway/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/exercise-3-api-gateway/billing-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/exercise-3-api-gateway/customer-service/src/main/java" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/exercise-4-circuit-breaker/payment-service/src/main/java" charset="UTF-8" />
+  </component>
+</project>
