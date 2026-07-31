@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NimbusOps — Cloud DevOps Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg:      #050a0f;
+      --bg2:     #080e15;
+      --panel:   #0b1520;
+      --border:  #0f2235;
+      --border2: #152d47;
+      --text:    #cce8ff;
+      --muted:   #3a6080;
+      --dim:     #1c3a52;
+      --cyan:    #00e5ff;
+      --green:   #00ff88;
+      --orange:  #ff6b35;
+      --red:     #ff3b5c;
+      --mono:    'JetBrains Mono', monospace;
+      --sans:    'Syne', sans-serif;
+      --glow-c:  0 0 20px rgba(0,229,255,0.3);
+      --glow-g:  0 0 20px rgba(0,255,136,0.3);
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 13px;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* scanlines */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.04) 2px, rgba(0,0,0,0.04) 4px);
+      pointer-events: none; z-index: 9998;
+    }
+
+    /* CURSOR */
+    #cur-dot {
+      width: 6px; height: 6px;
+      background: var(--cyan); border-radius: 0;
+      position: fixed; pointer-events: none; z-index: 10001;
+      transform: translate(-50%,-50%);
+      box-shadow: var(--glow-c);
+      transition: width .2s, height .2s;
+    }
+    #cur-cross {
+      position: fixed; pointer-events: none; z-index: 10000;
+      transform: translate(-50%,-50%);
+      width: 24px; height: 24px;
+      transition: left .08s, top .08s;
+    }
+    #cur-cross::before, #cur-cross::after {
+      content: ''; position: absolute; background: rgba(0,229,255,0.4);
+    }
+    #cur-cross::before { width: 1px; height: 100%; left: 50%; top: 0; }
+    #cur-cross::after  { width: 100%; height: 1px; top: 50%; left: 0; }
+
+    /* NAV */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 48px; height: 60px;
+      border-bottom: 1px solid var(--border);
+      background: rgba(5,10,15,0.92);
+      backdrop-filter: blur(16px);
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      font-family: var(--sans); font-size: 18px; font-weight: 800;
+      color: var(--text); text-decoration: none;
+    }
+    .nav-logo-box {
+      width: 28px; height: 28px;
+      border: 1px solid var(--cyan);
+      display: grid; place-items: center;
+      color: var(--cyan); font-size: 13px;
+      box-shadow: var(--glow-c);
+      animation: pulseBox 3s ease-in-out infinite;
+    }
+    @keyframes pulseBox { 0%,100%{opacity:1} 50%{opacity:0.5} }
+
+    .nav-links { display: flex; border: 1px solid var(--border); }
+    .nav-links a {
+      color: var(--muted); text-decoration: none;
+      font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 8px 20px; border-right: 1px solid var(--border);
+      transition: color .2s, background .2s;
+    }
+    .nav-links a:last-child { border-right: none; }
+    .nav-links a:hover { color: var(--cyan); background: rgba(0,229,255,0.04); }
+
+    .nav-right { display: flex; align-items: center; gap: 8px; font-size: 11px; }
+    .status-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--green); box-shadow: var(--glow-g);
+      animation: blink 2s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    .status-text { color: var(--green); letter-spacing: 0.1em; }
+    .nav-btn {
+      margin-left: 20px; padding: 8px 20px;
+      background: transparent; border: 1px solid var(--cyan);
+      color: var(--cyan); font-family: var(--mono);
+      font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase;
+      cursor: none; transition: background .3s, box-shadow .3s;
+    }
+    .nav-btn:hover { background: rgba(0,229,255,0.08); box-shadow: var(--glow-c); }
+
+    /* HERO */
+    .hero {
+      min-height: 100vh; padding-top: 60px;
+      display: grid; grid-template-columns: 1fr 1fr;
+      position: relative; overflow: hidden;
+    }
+    .hero-grid-bg {
+      position: absolute; inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 48px 48px;
+      animation: gridDrift 24s linear infinite;
+      opacity: 0.8;
+    }
+    @keyframes gridDrift { from{background-position:0 0} to{background-position:48px 48px} }
+    .hero-grid-bg::after {
+      content: ''; position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 60% 60% at 30% 50%, rgba(0,229,255,0.05) 0%, transparent 70%),
+        radial-gradient(ellipse 40% 40% at 75% 80%, rgba(0,255,136,0.03) 0%, transparent 60%);
+    }
+
+    .hero-left {
+      position: relative; z-index: 1;
+      display: flex; flex-direction: column; justify-content: center;
+      padding: 80px 48px;
+    }
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      border: 1px solid var(--border2); background: var(--panel);
+      padding: 6px 14px; margin-bottom: 36px; width: fit-content;
+      font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--cyan);
+      opacity: 0; transform: translateY(10px);
+      animation: fadeUp .6s ease .1s forwards;
+    }
+    .hero-badge::before { content: '//'; color: var(--muted); margin-right: 4px; }
+
+    .hero-title {
+      font-family: var(--sans);
+      font-size: clamp(44px, 5.5vw, 80px);
+      font-weight: 800; line-height: 1.0; letter-spacing: -0.03em;
+      opacity: 0; transform: translateY(20px);
+      animation: fadeUp .8s ease .3s forwards;
+    }
+    .hero-title .ac { color: var(--cyan); }
+    .hero-title .ag { color: var(--green); }
+
+    .hero-cmd {
+      margin: 28px 0;
+      background: var(--panel); border: 1px solid var(--border);
+      border-left: 2px solid var(--green);
+      padding: 14px 18px; font-size: 13px;
+      opacity: 0; transform: translateY(10px);
+      animation: fadeUp .6s ease .6s forwards;
+    }
+    .prompt { color: var(--green); margin-right: 8px; }
+    .blink-cur {
+      display: inline-block; width: 8px; height: 13px;
+      background: var(--cyan); vertical-align: middle; margin-left: 2px;
+      animation: blinkC .9s step-end infinite;
+    }
+    @keyframes blinkC { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    .hero-desc {
+      color: var(--muted); line-height: 1.9; max-width: 400px; font-size: 12px;
+      margin-bottom: 36px;
+      opacity: 0; transform: translateY(10px);
+      animation: fadeUp .6s ease .8s forwards;
+    }
+    .hero-actions {
+      display: flex; gap: 14px;
+      opacity: 0; transform: translateY(10px);
+      animation: fadeUp .6s ease 1s forwards;
+    }
+    .btn-p {
+      padding: 13px 26px; background: var(--cyan); color: var(--bg);
+      font-family: var(--mono); font-size: 12px; font-weight: 700;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      border: none; cursor: none; transition: box-shadow .3s, transform .2s;
+    }
+    .btn-p:hover { box-shadow: var(--glow-c); transform: translateY(-1px); }
+    .btn-g {
+      padding: 13px 26px; background: transparent; color: var(--text);
+      font-family: var(--mono); font-size: 12px;
+      letter-spacing: 0.1em; text-transform: uppercase;
+      border: 1px solid var(--border2); cursor: none;
+      transition: border-color .3s, color .3s;
+    }
+    .btn-g:hover { border-color: var(--cyan); color: var(--cyan); }
+
+    /* DASHBOARD PANEL */
+    .hero-right {
+      position: relative; z-index: 1;
+      padding: 100px 48px 80px;
+      display: flex; align-items: center;
+      opacity: 0; transform: translateX(30px);
+      animation: slideIn .9s ease .5s forwards;
+    }
+    @keyframes slideIn { to { opacity:1; transform:translateX(0); } }
+
+    .dash {
+      width: 100%; border: 1px solid var(--border); background: var(--panel);
+    }
+    .dash-hdr {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 10px 14px; background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+    }
+    .dash-title { font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); }
+    .dash-title span { color: var(--cyan); }
+    .win-dots { display: flex; gap: 5px; }
+    .win-dots i { width: 8px; height: 8px; border-radius: 50%; display: block; }
+    .win-dots i:nth-child(1) { background: var(--red); }
+    .win-dots i:nth-child(2) { background: var(--orange); }
+    .win-dots i:nth-child(3) { background: var(--green); }
+    .dash-body { padding: 16px; }
+
+    /* metrics */
+    .metrics { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; background: var(--border); margin-bottom: 16px; }
+    .metric { background: var(--bg2); padding: 12px 14px; }
+    .mlabel { font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+    .mval { font-family: var(--sans); font-size: 24px; font-weight: 700; line-height: 1; }
+    .mval.c { color: var(--cyan); }
+    .mval.g { color: var(--green); }
+    .mval.o { color: var(--orange); }
+    .mdelta { font-size: 9px; margin-top: 3px; }
+    .up { color: var(--green); } .dn { color: var(--red); }
+
+    /* pipeline */
+    .plabel { font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+    .pipeline { display: flex; align-items: center; margin-bottom: 16px; }
+    .pip {
+      flex: 1; position: relative;
+      display: flex; flex-direction: column; align-items: center; gap: 5px;
+    }
+    .pip:not(:last-child)::after {
+      content: ''; position: absolute;
+      top: 10px; left: 50%; right: -50%;
+      height: 1px; background: var(--border2);
+    }
+    .pip.done:not(:last-child)::after { background: var(--green); }
+    .pip.run:not(:last-child)::after { background: linear-gradient(90deg, var(--green), var(--border2)); }
+    .pdot {
+      width: 20px; height: 20px; border-radius: 50%;
+      border: 1px solid var(--border2); background: var(--bg2);
+      display: grid; place-items: center; font-size: 9px; z-index: 1;
+    }
+    .pip.done .pdot { border-color: var(--green); color: var(--green); background: rgba(0,255,136,0.07); }
+    .pip.run .pdot {
+      border-color: var(--cyan); color: var(--cyan); background: rgba(0,229,255,0.07);
+      animation: pulseR 1.5s ease-in-out infinite;
+    }
+    @keyframes pulseR {
+      0%,100% { box-shadow: 0 0 0 0 rgba(0,229,255,0.4); }
+      50% { box-shadow: 0 0 0 5px rgba(0,229,255,0); }
+    }
+    .pname { font-size: 8px; color: var(--muted); }
+    .pip.done .pname { color: var(--green); }
+    .pip.run  .pname { color: var(--cyan); }
+
+    /* nodes */
+    .nlabel { font-size: 9px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+    .nodes { display: grid; grid-template-columns: repeat(4,1fr); gap: 6px; }
+    .node {
+      border: 1px solid var(--border); background: var(--bg);
+      padding: 8px; font-size: 9px; position: relative;
+    }
+    .ndot { width: 5px; height: 5px; border-radius: 50%; position: absolute; top: 7px; right: 7px; }
+    .ndot.ok  { background: var(--green); box-shadow: var(--glow-g); }
+    .ndot.warn{ background: var(--orange); }
+    .nname { color: var(--muted); margin-bottom: 3px; }
+    .nval  { font-family: var(--sans); font-size: 15px; font-weight: 700; }
+
+    /* log */
+    .log {
+      border-top: 1px solid var(--border); margin-top: 14px; padding-top: 12px;
+      height: 72px; overflow: hidden; position: relative;
+    }
+    .log::after {
+      content: ''; position: absolute; bottom: 0; left: 0; right: 0;
+      height: 28px; background: linear-gradient(transparent, var(--panel));
+    }
+    .loglines { animation: logUp 9s linear infinite; }
+    .ll { font-size: 10px; line-height: 1.75; color: var(--muted); }
+    .ts  { color: var(--dim); margin-right: 6px; }
+    .ok  { color: var(--green); margin-right: 5px; }
+    .inf { color: var(--cyan);  margin-right: 5px; }
+    .wrn { color: var(--orange);margin-right: 5px; }
+    @keyframes logUp { from{transform:translateY(0)} to{transform:translateY(-50%)} }
+
+    /* TICKER */
+    .ticker { overflow: hidden; padding: 9px 0; background: var(--bg2); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); display:flex; }
+    .tick-track { display:flex; white-space:nowrap; animation: tickMove 22s linear infinite; }
+    @keyframes tickMove { from{transform:translateX(0)} to{transform:translateX(-50%)} }
+    .tick-item {
+      display: inline-flex; align-items: center; gap: 16px;
+      padding: 0 28px; font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--muted); border-right: 1px solid var(--border);
+    }
+    .tick-item .tg { color: var(--cyan); }
+    .tick-item .tok{ color: var(--green); }
+
+    /* SECTIONS */
+    section { padding: 100px 48px; }
+    .sec-head { display: flex; align-items: baseline; gap: 16px; margin-bottom: 60px; }
+    .sec-n { font-size: 11px; color: var(--muted); letter-spacing: 0.2em; }
+    .sec-h { font-family: var(--sans); font-size: clamp(28px, 3.5vw, 48px); font-weight: 800; letter-spacing: -0.02em; }
+    .sec-h .hl { color: var(--cyan); }
+    .sec-line { flex:1; height:1px; background: var(--border); margin-left:16px; }
+
+    /* SERVICES */
+    .srvs { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; background: var(--border); }
+    .srv {
+      background: var(--bg2); padding: 36px 32px; position: relative; overflow: hidden;
+      transition: background .3s;
+    }
+    .srv::before {
+      content: ''; position: absolute; top:0; left:0; width:2px; height:0;
+      background: var(--cyan); transition: height .4s;
+    }
+    .srv:hover::before { height: 100%; }
+    .srv:hover { background: var(--panel); }
+    .srv-ico {
+      width: 38px; height: 38px; border: 1px solid var(--border2);
+      display: grid; place-items: center; font-size: 17px; margin-bottom: 20px;
+      color: var(--cyan); transition: border-color .3s, box-shadow .3s;
+    }
+    .srv:hover .srv-ico { border-color: var(--cyan); box-shadow: var(--glow-c); }
+    .srv-name { font-family: var(--sans); font-size: 17px; font-weight: 700; margin-bottom: 10px; }
+    .srv-desc { color: var(--muted); line-height: 1.8; font-size: 12px; margin-bottom: 20px; }
+    .srv-tags { display: flex; flex-wrap: wrap; gap: 7px; }
+    .srv-tag { font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; padding: 3px 9px; border: 1px solid var(--border2); color: var(--muted); }
+
+    /* STACK */
+    .stack-section { border-top: 1px solid var(--border); }
+    .stack-g { display: grid; grid-template-columns: repeat(6,1fr); gap: 1px; background: var(--border); }
+    .stk {
+      background: var(--bg2); padding: 28px 16px;
+      display: flex; flex-direction: column; align-items: center; gap: 10px;
+      transition: background .3s;
+    }
+    .stk:hover { background: var(--panel); }
+    .stk:hover .stk-name { color: var(--cyan); }
+    .stk-ico { font-size: 26px; }
+    .stk-name { font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); transition: color .3s; }
+
+    /* TERMINAL SECTION */
+    .term-section { border-top: 1px solid var(--border); display: grid; grid-template-columns: 1fr 1fr; }
+    .term-left { padding: 80px 48px; border-right: 1px solid var(--border); display:flex; flex-direction:column; justify-content:center; }
+    .term-right{ padding: 80px 48px; display:flex; align-items:center; }
+    .term-box { width:100%; border: 1px solid var(--border); background: #020608; }
+    .term-bar {
+      display:flex; align-items:center; gap:7px; padding: 9px 13px;
+      background: var(--bg2); border-bottom: 1px solid var(--border);
+    }
+    .tbar-dots { display:flex; gap:5px; }
+    .tbar-dots i { width:8px; height:8px; border-radius:50%; display:block; }
+    .tbar-dots i:nth-child(1){background:#3d1e1e;}
+    .tbar-dots i:nth-child(2){background:#3d2e1a;}
+    .tbar-dots i:nth-child(3){background:#1a3020;}
+    .tbar-t { font-size:10px; color:var(--muted); letter-spacing:0.1em; margin-left:6px; }
+    .term-body { padding:18px; font-size:12px; line-height:2; }
+    .tl { display:block; }
+    .tp { color:var(--green); }
+    .tk { color:var(--cyan); }
+    .tv { color:#e8c57a; }
+    .td { color:var(--muted); }
+    .tok2{ color:var(--green); }
+    .terr{ color:var(--red); }
+
+    /* STATS */
+    .stats-row { border-top: 1px solid var(--border); display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--border); }
+    .stat {
+      background: var(--bg2); padding: 56px 40px;
+      position: relative; overflow: hidden; transition: background .3s;
+    }
+    .stat:hover { background: var(--panel); }
+    .stat::after { content:''; position:absolute; bottom:0; left:0; right:0; height:1px; background:transparent; transition:background .3s; }
+    .stat:hover::after { background: var(--cyan); }
+    .stat-n { font-family:var(--sans); font-size:52px; font-weight:800; line-height:1; margin-bottom:6px; }
+    .stat-n .u { font-size:26px; color:var(--cyan); }
+    .stat-l { font-size:10px; letter-spacing:0.2em; text-transform:uppercase; color:var(--muted); }
+
+    /* FOOTER */
+    footer { border-top:1px solid var(--border); padding:36px 48px; display:flex; justify-content:space-between; align-items:center; }
+    .foot-brand { font-family:var(--sans); font-size:20px; font-weight:800; }
+    .foot-brand span { color:var(--cyan); }
+    .foot-links { display:flex; gap:28px; }
+    .foot-links a { color:var(--muted); text-decoration:none; font-size:11px; letter-spacing:0.1em; text-transform:uppercase; transition:color .3s; }
+    .foot-links a:hover { color:var(--cyan); }
+    .foot-copy { font-size:10px; color:var(--muted); letter-spacing:0.08em; }
+
+    /* ANIMATIONS */
+    @keyframes fadeUp { to { opacity:1; transform:translateY(0); } }
+    .reveal { opacity:0; transform:translateY(22px); transition: opacity .7s ease, transform .7s ease; }
+    .reveal.visible { opacity:1; transform:translateY(0); }
+    .d1{transition-delay:.1s} .d2{transition-delay:.2s} .d3{transition-delay:.3s}
+
+    ::-webkit-scrollbar{width:2px}
+    ::-webkit-scrollbar-track{background:var(--bg)}
+    ::-webkit-scrollbar-thumb{background:var(--border2)}
+  </style>
+</head>
+<body>
+
+<div id="cur-dot"></div>
+<div id="cur-cross"></div>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="#">
+    <div class="nav-logo-box">▲</div>
+    NimbusOps
+  </a>
+  <div class="nav-links">
+    <a href="#services">Services</a>
+    <a href="#stack">Stack</a>
+    <a href="#deploy">Deploy</a>
+    <a href="#contact">Contact</a>
+  </div>
+  <div class="nav-right">
+    <span class="status-dot"></span>
+    <span class="status-text">All systems operational</span>
+    <button class="nav-btn">Get Started</button>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-grid-bg"></div>
+
+  <div class="hero-left">
+    <div class="hero-badge">Cloud-Native DevOps Platform</div>
+    <h1 class="hero-title">
+      Build.<br><span class="ac">Deploy.</span><br><span class="ag">Scale.</span>
+    </h1>
+    <div class="hero-cmd">
+      <span class="prompt">$</span>
+      <span>nimbus deploy --env prod --replicas 3</span>
+      <span class="blink-cur"></span>
+    </div>
+    <p class="hero-desc">Infrastructure automation and CI/CD pipelines built for teams who ship at the speed of thought. Zero downtime. Infinite scale.</p>
+    <div class="hero-actions">
+      <button class="btn-p">Start Deploying</button>
+      <button class="btn-g">View Docs →</button>
+    </div>
+  </div>
+
+  <div class="hero-right">
+    <div class="dash">
+      <div class="dash-hdr">
+        <div class="win-dots"><i></i><i></i><i></i></div>
+        <div class="dash-title">nimbus / <span>prod-cluster-us-east-1</span></div>
+        <div class="status-dot"></div>
+      </div>
+      <div class="dash-body">
+        <div class="metrics">
+          <div class="metric">
+            <div class="mlabel">CPU Usage</div>
+            <div class="mval c" id="m-cpu">24%</div>
+            <div class="mdelta up">↑ 3% from avg</div>
+          </div>
+          <div class="metric">
+            <div class="mlabel">Uptime</div>
+            <div class="mval g">99.98%</div>
+            <div class="mdelta up">30d streak</div>
+          </div>
+          <div class="metric">
+            <div class="mlabel">Requests/s</div>
+            <div class="mval o" id="m-rps">12.4k</div>
+            <div class="mdelta dn">↓ 2% this hour</div>
+          </div>
+        </div>
+
+        <div class="plabel">// CI/CD Pipeline — build #4821</div>
+        <div class="pipeline">
+          <div class="pip done"><div class="pdot">✓</div><div class="pname">Source</div></div>
+          <div class="pip done"><div class="pdot">✓</div><div class="pname">Build</div></div>
+          <div class="pip done"><div class="pdot">✓</div><div class="pname">Test</div></div>
+          <div class="pip run"> <div class="pdot">⟳</div><div class="pname">Deploy</div></div>
+          <div class="pip">     <div class="pdot">○</div><div class="pname">Verify</div></div>
+        </div>
+
+        <div class="nlabel">// Node Health — 4 pods running</div>
+        <div class="nodes">
+          <div class="node"><div class="ndot ok"></div><div class="nname">pod-01</div><div class="nval" id="n1">18%</div></div>
+          <div class="node"><div class="ndot ok"></div><div class="nname">pod-02</div><div class="nval" id="n2">31%</div></div>
+          <div class="node"><div class="ndot warn"></div><div class="nname">pod-03</div><div class="nval" id="n3">72%</div></div>
+          <div class="node"><div class="ndot ok"></div><div class="nname">pod-04</div><div class="nval" id="n4">24%</div></div>
+        </div>
+
+        <div class="log">
+          <div class="loglines">
+            <div class="ll"><span class="ts">14:22:01</span><span class="ok">[OK]</span>Deployment rollout: 3/3 replicas ready</div>
+            <div class="ll"><span class="ts">14:22:03</span><span class="inf">[INFO]</span>Health check passed — /health 200</div>
+            <div class="ll"><span class="ts">14:22:07</span><span class="ok">[OK]</span>DNS propagation complete</div>
+            <div class="ll"><span class="ts">14:22:09</span><span class="wrn">[WARN]</span>pod-03 memory at 72% — autoscale trigger</div>
+            <div class="ll"><span class="ts">14:22:11</span><span class="inf">[INFO]</span>Scaling pod pool: 4 → 5 instances</div>
+            <!-- duplicate for seamless loop -->
+            <div class="ll"><span class="ts">14:22:01</span><span class="ok">[OK]</span>Deployment rollout: 3/3 replicas ready</div>
+            <div class="ll"><span class="ts">14:22:03</span><span class="inf">[INFO]</span>Health check passed — /health 200</div>
+            <div class="ll"><span class="ts">14:22:07</span><span class="ok">[OK]</span>DNS propagation complete</div>
+            <div class="ll"><span class="ts">14:22:09</span><span class="wrn">[WARN]</span>pod-03 memory at 72% — autoscale trigger</div>
+            <div class="ll"><span class="ts">14:22:11</span><span class="inf">[INFO]</span>Scaling pod pool: 4 → 5 instances</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TICKER -->
+<div class="ticker">
+  <div class="tick-track">
+    <span class="tick-item"><span class="tg">kubernetes</span><span class="tok">● healthy</span></span>
+    <span class="tick-item"><span class="tg">terraform</span><span class="tok">● applied</span></span>
+    <span class="tick-item"><span class="tg">argocd</span><span class="tok">● synced</span></span>
+    <span class="tick-item"><span class="tg">prometheus</span><span class="tok">● scraping</span></span>
+    <span class="tick-item"><span class="tg">vault</span><span class="tok">● sealed</span></span>
+    <span class="tick-item"><span class="tg">istio</span><span class="tok">● running</span></span>
+    <span class="tick-item"><span class="tg">grafana</span><span class="tok">● live</span></span>
+    <!-- duplicate -->
+    <span class="tick-item"><span class="tg">kubernetes</span><span class="tok">● healthy</span></span>
+    <span class="tick-item"><span class="tg">terraform</span><span class="tok">● applied</span></span>
+    <span class="tick-item"><span class="tg">argocd</span><span class="tok">● synced</span></span>
+    <span class="tick-item"><span class="tg">prometheus</span><span class="tok">● scraping</span></span>
+    <span class="tick-item"><span class="tg">vault</span><span class="tok">● sealed</span></span>
+    <span class="tick-item"><span class="tg">istio</span><span class="tok">● running</span></span>
+    <span class="tick-item"><span class="tg">grafana</span><span class="tok">● live</span></span>
+  </div>
+</div>
+
+<!-- SERVICES -->
+<section id="services">
+  <div class="sec-head reveal">
+    <span class="sec-n">01</span>
+    <h2 class="sec-h">Core <span class="hl">Services</span></h2>
+    <div class="sec-line"></div>
+  </div>
+  <div class="srvs">
+    <div class="srv reveal d1">
+      <div class="srv-ico">⬡</div>
+      <div class="srv-name">Container Orchestration</div>
+      <p class="srv-desc">Managed Kubernetes clusters with auto-scaling, self-healing, and zero-downtime rolling deployments across multi-cloud environments.</p>
+      <div class="srv-tags"><span class="srv-tag">K8s</span><span class="srv-tag">EKS</span><span class="srv-tag">GKE</span><span class="srv-tag">AKS</span></div>
+    </div>
+    <div class="srv reveal d2">
+      <div class="srv-ico">⚡</div>
+      <div class="srv-name">CI/CD Pipelines</div>
+      <p class="srv-desc">GitOps-driven continuous delivery with progressive rollouts, canary deployments, and automated rollback on failure detection.</p>
+      <div class="srv-tags"><span class="srv-tag">ArgoCD</span><span class="srv-tag">Actions</span><span class="srv-tag">Flux</span></div>
+    </div>
+    <div class="srv reveal d3">
+      <div class="srv-ico">🔐</div>
+      <div class="srv-name">Secrets & Compliance</div>
+      <p class="srv-desc">Dynamic secrets rotation with HashiCorp Vault, RBAC policies, SOC2 audit trails, and end-to-end encryption at rest and transit.</p>
+      <div class="srv-tags"><span class="srv-tag">Vault</span><span class="srv-tag">OPA</span><span class="srv-tag">SOC2</span></div>
+    </div>
+    <div class="srv reveal d1">
+      <div class="srv-ico">📡</div>
+      <div class="srv-name">Observability Stack</div>
+      <p class="srv-desc">Full-stack telemetry — distributed tracing, metrics aggregation, log pipelines, and intelligent alerting with sub-second resolution.</p>
+      <div class="srv-tags"><span class="srv-tag">Prometheus</span><span class="srv-tag">Grafana</span><span class="srv-tag">Jaeger</span></div>
+    </div>
+    <div class="srv reveal d2">
+      <div class="srv-ico">🌐</div>
+      <div class="srv-name">Service Mesh</div>
+      <p class="srv-desc">mTLS encryption between services, traffic shaping, circuit breaking, and intelligent load balancing with Istio and Envoy proxy.</p>
+      <div class="srv-tags"><span class="srv-tag">Istio</span><span class="srv-tag">Envoy</span><span class="srv-tag">Linkerd</span></div>
+    </div>
+    <div class="srv reveal d3">
+      <div class="srv-ico">🏗</div>
+      <div class="srv-name">Infrastructure as Code</div>
+      <p class="srv-desc">Declarative infrastructure with Terraform modules, Pulumi stacks, and Crossplane — version-controlled, drift-detected, reproducible.</p>
+      <div class="srv-tags"><span class="srv-tag">Terraform</span><span class="srv-tag">Pulumi</span><span class="srv-tag">Crossplane</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- STACK -->
+<section id="stack" class="stack-section" style="padding-top:0">
+  <div class="sec-head reveal" style="padding-top:80px">
+    <span class="sec-n">02</span>
+    <h2 class="sec-h">Tech <span class="hl">Stack</span></h2>
+    <div class="sec-line"></div>
+  </div>
+  <div class="stack-g reveal">
+    <div class="stk"><div class="stk-ico">☸</div><div class="stk-name">Kubernetes</div></div>
+    <div class="stk"><div class="stk-ico">🐳</div><div class="stk-name">Docker</div></div>
+    <div class="stk"><div class="stk-ico">🔷</div><div class="stk-name">Terraform</div></div>
+    <div class="stk"><div class="stk-ico">⬡</div><div class="stk-name">Helm</div></div>
+    <div class="stk"><div class="stk-ico">🟠</div><div class="stk-name">AWS</div></div>
+    <div class="stk"><div class="stk-ico">🔵</div><div class="stk-name">Azure</div></div>
+    <div class="stk"><div class="stk-ico">🟡</div><div class="stk-name">GCP</div></div>
+    <div class="stk"><div class="stk-ico">📊</div><div class="stk-name">Grafana</div></div>
+    <div class="stk"><div class="stk-ico">🔥</div><div class="stk-name">Prometheus</div></div>
+    <div class="stk"><div class="stk-ico">🛡</div><div class="stk-name">Vault</div></div>
+    <div class="stk"><div class="stk-ico">🐙</div><div class="stk-name">ArgoCD</div></div>
+    <div class="stk"><div class="stk-ico">⚡</div><div class="stk-name">Istio</div></div>
+  </div>
+</section>
+
+<!-- TERMINAL / DEPLOY -->
+<div id="deploy" class="term-section">
+  <div class="term-left">
+    <div class="sec-head reveal" style="margin-bottom:28px">
+      <span class="sec-n">03</span>
+      <h2 class="sec-h">Deploy in <span class="hl">Seconds</span></h2>
+    </div>
+    <p class="reveal" style="color:var(--muted);line-height:1.9;font-size:12px;margin-bottom:20px">
+      From git push to production in under 90 seconds. Our GitOps engine handles builds, security scans, staging validation, and progressive rollouts — automatically.
+    </p>
+    <p class="reveal d1" style="color:var(--muted);line-height:1.9;font-size:12px">
+      Every deployment is immutable, auditable, and reversible. One command to roll back to any prior state in your history.
+    </p>
+  </div>
+  <div class="term-right">
+    <div class="term-box reveal">
+      <div class="term-bar">
+        <div class="tbar-dots"><i></i><i></i><i></i></div>
+        <div class="tbar-t">bash — nimbus-cli v2.4.1</div>
+      </div>
+      <div class="term-body">
+        <span class="tl"><span class="tp">❯</span> git push origin main</span>
+        <span class="tl td">&nbsp;&nbsp;Enumerating objects: 5 done.</span>
+        <span class="tl td">&nbsp;&nbsp;Writing objects: 100% (3/3), 892 bytes.</span>
+        <span class="tl">&nbsp;</span>
+        <span class="tl"><span class="tp">❯</span> nimbus pipeline watch</span>
+        <span class="tl"><span class="tok2">&nbsp;&nbsp;✓</span> <span class="tk">source</span>&nbsp;&nbsp;&nbsp;<span class="tv">cloned</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="td">0.8s</span></span>
+        <span class="tl"><span class="tok2">&nbsp;&nbsp;✓</span> <span class="tk">build</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="tv">image pushed</span>&nbsp;&nbsp;&nbsp;&nbsp;<span class="td">22.1s</span></span>
+        <span class="tl"><span class="tok2">&nbsp;&nbsp;✓</span> <span class="tk">scan</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="tv">0 critical CVE</span>&nbsp;&nbsp;<span class="td">8.3s</span></span>
+        <span class="tl"><span class="tok2">&nbsp;&nbsp;✓</span> <span class="tk">test</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="tv">142 passed</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="td">14.7s</span></span>
+        <span class="tl" style="color:var(--cyan)">&nbsp;&nbsp;⟳ <span class="tk">deploy</span>&nbsp;&nbsp;&nbsp;<span class="tv">rolling out...</span></span>
+        <span class="tl">&nbsp;</span>
+        <span class="tl"><span class="tp">❯</span> <span class="blink-cur"></span></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- STATS -->
+<div class="stats-row">
+  <div class="stat reveal"><div class="stat-n"><span id="s1">0</span><span class="u">%</span></div><div class="stat-l">Avg Uptime SLA</div></div>
+  <div class="stat reveal d1"><div class="stat-n"><span id="s2">0</span><span class="u">s</span></div><div class="stat-l">Mean Deploy Time</div></div>
+  <div class="stat reveal d2"><div class="stat-n"><span id="s3">0</span><span class="u">k</span></div><div class="stat-l">Deployments / Month</div></div>
+  <div class="stat reveal d3"><div class="stat-n"><span id="s4">0</span><span class="u">+</span></div><div class="stat-l">Engineering Teams</div></div>
+</div>
+
+<!-- FOOTER -->
+<footer id="contact">
+  <div class="foot-brand">Nimbus<span>Ops</span></div>
+  <div class="foot-links">
+    <a href="#">Docs</a>
+    <a href="#">Pricing</a>
+    <a href="#">Status</a>
+    <a href="#">GitHub</a>
+  </div>
+  <div class="foot-copy">© 2024 NimbusOps Inc. — Built with ♥ for devs</div>
+</footer>
+
+<script>
+  // CURSOR
+  const dot = document.getElementById('cur-dot');
+  const cross = document.getElementById('cur-cross');
+  document.addEventListener('mousemove', e => {
+    dot.style.left   = e.clientX + 'px';
+    dot.style.top    = e.clientY + 'px';
+    cross.style.left = e.clientX + 'px';
+    cross.style.top  = e.clientY + 'px';
+  });
+  document.querySelectorAll('a, button, .srv, .stk, .stat, .metric').forEach(el => {
+    el.addEventListener('mouseenter', () => { dot.style.width = '12px'; dot.style.height = '12px'; });
+    el.addEventListener('mouseleave', () => { dot.style.width = '6px';  dot.style.height = '6px';  });
+  });
+
+  // SCROLL REVEAL
+  const ro = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); ro.unobserve(e.target); } });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => ro.observe(el));
+
+  // COUNTERS
+  function count(el, target, dur = 1400) {
+    let s = null;
+    const step = ts => {
+      if (!s) s = ts;
+      const p = Math.min((ts - s) / dur, 1);
+      el.textContent = Math.floor((1 - Math.pow(1 - p, 3)) * target);
+      if (p < 1) requestAnimationFrame(step); else el.textContent = target;
+    };
+    requestAnimationFrame(step);
+  }
+  const so = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        count(document.getElementById('s1'), 99);
+        count(document.getElementById('s2'), 87);
+        count(document.getElementById('s3'), 240);
+        count(document.getElementById('s4'), 400);
+        so.disconnect();
+      }
+    });
+  }, { threshold: 0.3 });
+  so.observe(document.querySelector('.stats-row'));
+
+  // LIVE METRICS
+  setInterval(() => {
+    document.getElementById('m-cpu').textContent = Math.floor(Math.random() * 22 + 18) + '%';
+    document.getElementById('m-rps').textContent = (Math.random() * 5 + 10).toFixed(1) + 'k';
+    document.getElementById('n1').textContent = Math.floor(Math.random() * 20 + 10) + '%';
+    document.getElementById('n2').textContent = Math.floor(Math.random() * 25 + 20) + '%';
+    document.getElementById('n3').textContent = Math.floor(Math.random() * 20 + 60) + '%';
+    document.getElementById('n4').textContent = Math.floor(Math.random() * 20 + 15) + '%';
+  }, 2500);
+</script>
+</body>
+</html>
